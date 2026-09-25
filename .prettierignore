@@ -1,0 +1,20 @@
+# Package Managers
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+bun.lock
+bun.lockb
+
+# Dependencies
+/node_modules/
+
+# Build / generated
+/static/
+/.svelte-kit/
+/build/
+/dist/
+/src-tauri/target/
+/src-tauri/gen/
+# Paraglide / inlang project tree (tool-managed; only settings.json is intentional).
+# Cache, .meta.json, README.md, and .lix are generated and must not fail prettier --check.
+/project.inlang/

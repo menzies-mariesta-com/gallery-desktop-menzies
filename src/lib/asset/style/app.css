@@ -1,0 +1,52 @@
+@import 'tailwindcss';
+@import '@menzies-mariesta-com/menzies-design-wash-ui/styles.css' layer(components);
+
+html,
+body,
+#svelte {
+	height: 100%;
+	width: 100%;
+	margin: 0;
+	overflow: hidden;
+}
+
+body {
+	background: var(--color-base-100, #f7f4ef);
+	color: var(--color-base-content, #1c1917);
+	font-family: var(--font-sans);
+}
+
+/* Fluid gallery shell tokens (phone ~360 → tablet ~768 → desktop 1280+). */
+.calc-shell {
+	--calc-gap: clamp(0.5rem, 1.5vw, 0.75rem);
+	--calc-pad: clamp(0.5rem, 1.8vw, 1rem);
+	--calc-display: clamp(1.75rem, 7vw, 3.75rem);
+	--calc-key: clamp(1.05rem, 3.5vw, 1.85rem);
+}
+
+.calc-units {
+	--units-title: clamp(1.15rem, 3.2vw, 1.65rem);
+	--units-result: clamp(1.75rem, 6vw, 3rem);
+}
+
+/* Titlebar tooltips must paint above the gallery body (not clipped by shell stacking). */
+[data-titlebar] {
+	isolation: isolate;
+}
+
+[data-titlebar] .tooltip::before,
+[data-titlebar] .tooltip::after {
+	z-index: 300;
+	pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+		scroll-behavior: auto !important;
+	}
+}

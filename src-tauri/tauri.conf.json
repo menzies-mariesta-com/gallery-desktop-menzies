@@ -1,0 +1,55 @@
+{
+	"$schema": "https://schema.tauri.app/config/2",
+	"productName": "Gallery",
+	"version": "0.1.0",
+	"identifier": "com.mariesta.menzies.gallery-desktop-menzies",
+	"build": {
+		"frontendDist": "../build",
+		"devUrl": "http://localhost:2002",
+		"beforeDevCommand": "npm run dev",
+		"beforeBuildCommand": "npm run build"
+	},
+	"app": {
+		"windows": [
+			{
+				"label": "main",
+				"title": "Gallery",
+				"width": 1100,
+				"height": 720,
+				"minWidth": 360,
+				"minHeight": 520,
+				"resizable": true,
+				"fullscreen": false,
+				"decorations": false,
+				"center": true
+			}
+		],
+		"security": {
+			"csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' asset: http://asset.localhost https://asset.localhost data: blob:; font-src 'self' data:; connect-src 'self' ipc: http://ipc.localhost ws://localhost:2002 http://localhost:2002; worker-src 'self' blob:",
+			"assetProtocol": {
+				"enable": true,
+				"scope": ["$HOME/Pictures/**", "$HOME/Pictures", "$HOME/**"]
+			}
+		}
+	},
+	"bundle": {
+		"active": true,
+		"createUpdaterArtifacts": true,
+		"targets": "all",
+		"icon": [
+			"icons/32x32.png",
+			"icons/128x128.png",
+			"icons/128x128@2x.png",
+			"icons/icon.icns",
+			"icons/icon.ico"
+		]
+	},
+	"plugins": {
+		"updater": {
+			"pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDI0OTdBRDMxRkQ5MUY0MDEKUldRQjlKSDlNYTJYSkR0ZncwaEJOcitDRWExdjVLVWkrUUhydE1FeUMrSHQ3VTB2NjVBQ01PRjgK",
+			"endpoints": [
+				"https://github.com/menzies-mariesta-com/gallery-desktop-menzies/releases/latest/download/latest.json"
+			]
+		}
+	}
+}

@@ -1,0 +1,104 @@
+# Manual Tauri release build + updater artifacts (workflow_dispatch only).
+# Secrets (repo Settings → Secrets and variables → Actions):
+#   TAURI_SIGNING_PRIVATE_KEY
+#     Gallery private key only (e.g. contents or path of ~/.tauri/gallery-desktop-menzies.key).
+#     Do not paste the calculator-desktop-menzies key. Secret name matches other apps; value is gallery-specific.
+#   TAURI_SIGNING_PRIVATE_KEY_PASSWORD  (optional; empty if key has no password)
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_draft:
+        description: Create or reuse a draft GitHub Release
+        type: boolean
+        default: true
+      tag:
+        description: Release tag (defaults to package.json version)
+        type: string
+        required: false
+        default: ''
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  publish-tauri:
+    name: Build (${{ matrix.platform }})
+    runs-on: ${{ matrix.platform }}
+    continue-on-error: ${{ matrix.platform != 'ubuntu-22.04' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Linux primary: lean bundles only (rule 11-smallest-app-size).
+          - platform: ubuntu-22.04
+            args: '--bundles deb,appimage,rpm'
+          - platform: macos-latest
+            args: ''
+          - platform: windows-latest
+            args: ''
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve tag
+        id: ver
+        shell: bash
+        run: |
+          TAG="${{ inputs.tag }}"
+          if [ -z "$TAG" ]; then
+            TAG="$(node -p "require('./package.json').version")"
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Install Linux WebKit / Tauri deps
+        if: matrix.platform == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            libappindicator3-dev \
+            librsvg2-dev \
+            patchelf \
+            libssl-dev
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install npm dependencies
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+        run: npm ci
+
+      - name: Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri -> target
+          key: release-${{ matrix.platform }}
+
+      - name: Build and upload (Tauri)
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        with:
+          tagName: ${{ steps.ver.outputs.tag }}
+          releaseName: ${{ steps.ver.outputs.tag }}
+          releaseBody: See the assets to download this version and install.
+          releaseDraft: ${{ inputs.release_draft }}
+          prerelease: false
+          includeUpdaterJson: true
+          args: ${{ matrix.args }}
