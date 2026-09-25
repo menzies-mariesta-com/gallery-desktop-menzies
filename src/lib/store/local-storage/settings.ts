@@ -68,15 +68,7 @@ export type SortBy = z.infer<typeof sortBySchema>;
 export const sortDirSchema = z.enum(['asc', 'desc']);
 export type SortDir = z.infer<typeof sortDirSchema>;
 
-export const typeFilterSchema = z.enum([
-	'all',
-	'jpg',
-	'png',
-	'webp',
-	'gif',
-	'bmp',
-	'svg'
-]);
+export const typeFilterSchema = z.enum(['all', 'jpg', 'png', 'webp', 'gif', 'bmp', 'svg']);
 export type TypeFilter = z.infer<typeof typeFilterSchema>;
 
 export const galleryDiskSettingsSchema = z.object({

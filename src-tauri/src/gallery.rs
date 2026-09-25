@@ -180,8 +180,8 @@ fn list_immediate(dir: &Path) -> Result<Vec<GalleryEntry>, GalleryError> {
         }
     }
 
-    folders.sort_by(|a, b| a.name.to_lowercase().cmp(&b.name.to_lowercase()));
-    images.sort_by(|a, b| a.name.to_lowercase().cmp(&b.name.to_lowercase()));
+    folders.sort_by_key(|a| a.name.to_lowercase());
+    images.sort_by_key(|a| a.name.to_lowercase());
 
     folders.extend(images);
     Ok(folders)
