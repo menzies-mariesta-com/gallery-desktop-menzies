@@ -4,7 +4,7 @@ Linux-first image gallery for the Menzies desktop suite. Opens your **Pictures**
 
 ## Identity
 
-Product icon: **Lucide Image** + water-block circle (music-mobile soft mist: paper `#F7F4EF`, mist/peach/rose circles). Black Lucide stroke (~2.2), no outline. Master: `static/app-icon.svg`.
+Product icon: **Lucide Image** + full music water-block (organic blotches + soft mist, paper `#F7F4EF`). Mineral ink `#1A3A48`, stroke ~2.6 at scale 17.2, no outline. Master: `static/app-icon.svg`.
 
 ## Run
 

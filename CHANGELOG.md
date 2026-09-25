@@ -1,8 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Product icon aligned to Music water-block recipe: organic pigment blotches + mist glow, mineral ink `#1A3A48`, thick Lucide Image stroke.
+
 ## 0.1.1
 
-- Product icon: water-block circle backdrop (music-mobile soft mist) with thicker black Lucide Image stroke; no fractal splash blotches or paper outline.
+- Product icon: transitional water-block mist with black Lucide Image stroke (superseded; see Unreleased for full music recipe).
 
 ## 0.1.0
 
