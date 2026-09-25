@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Regenerate app icon rasters from static/app-icon.svg (Lucide Image + mineral splash).
-# Canonical splash recipe: music-player-mobile-menzies/static/app-icon.svg (paper #F7F4EF, blue/ochre/rose).
+# Regenerate app icon rasters from static/app-icon.svg (Lucide Image + water-block circle).
+# Canonical backdrop: music-player-mobile-menzies soft mist / water-block circles (paper #F7F4EF).
 # Rule: menzies-os/.cursor/rules/10-app-product-icons.mdc
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
