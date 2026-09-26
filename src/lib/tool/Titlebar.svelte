@@ -132,16 +132,16 @@
 	class="border-ink-border/15 bg-base-100/90 relative z-[200] flex h-10 shrink-0 items-center overflow-visible border-b px-1 backdrop-blur-sm"
 >
 	<div
-		class="flex min-w-[8rem] flex-1 cursor-grab items-center gap-2 px-2 active:cursor-grabbing"
+		class="flex min-w-[8rem] flex-1 cursor-grab items-center gap-2 overflow-visible pr-3 pl-2 active:cursor-grabbing"
 		onpointerdown={startDrag}
 		role="presentation"
 	>
-		<span class="inline-flex max-w-full items-baseline gap-1">
+		<span class="inline-flex max-w-full items-baseline gap-1 overflow-visible pb-0.5">
 			<span
-				class="font-display text-base-content text-sm font-semibold tracking-wide whitespace-nowrap"
+				class="font-display text-base-content text-sm leading-normal font-semibold tracking-wide whitespace-nowrap"
 				>{m.app_title()}</span
 			>
-			<span class="relative top-[0.15em] shrink-0 text-[0.65em] leading-none italic opacity-50"
+			<span class="shrink-0 pe-1.5 pt-[0.15em] text-[0.65em] leading-none italic opacity-50"
 				>{APP_VERSION}</span
 			>
 		</span>
