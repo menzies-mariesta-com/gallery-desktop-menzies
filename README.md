@@ -71,4 +71,6 @@ GitHub Actions workflows use **`workflow_dispatch` only** (no auto-run on push).
 | CI       | [`.github/workflows/ci.yml`](.github/workflows/ci.yml)           | Matrix: Linux (required), macOS/Windows (`continue-on-error`)                                              |
 | Release  | [`.github/workflows/release.yml`](.github/workflows/release.yml) | Needs `TAURI_SIGNING_PRIVATE_KEY` (and optional password) repo secrets holding the **gallery** private key |
 
+Wash UI is a `file:` dependency on sibling `design-lib-menzies`. CI runs [`scripts/ci-prepare-wash-ui.sh`](scripts/ci-prepare-wash-ui.sh) before `npm ci` to clone that repo and build the library (`dist` is gitignored). If `design-lib-menzies` is private, add repo secret `DESIGN_LIB_CHECKOUT_TOKEN` with `contents:read` on that repository.
+
 Release builds Linux deb/AppImage/rpm first; macOS and Windows are best-effort.

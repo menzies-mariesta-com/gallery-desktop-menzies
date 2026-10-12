@@ -1,6 +1,6 @@
 import { paraglideVitePlugin } from '@inlang/paraglide-js';
 import tailwindcss from '@tailwindcss/vite';
-import { readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vitest/config';
@@ -20,9 +20,28 @@ const pkg = JSON.parse(
 // symlink realpath and blocks woff2 unless that package root is in server.fs.allow.
 // Keep the allow list narrow: app root + Wash package only (not Desktop; not for
 // client package.json imports; see regression items 3 and 13).
-const washUiRoot = dirname(
-	fileURLToPath(import.meta.resolve('@menzies-mariesta-com/menzies-design-wash-ui/package.json'))
-);
+// CI must clone and build design-lib-menzies first (scripts/ci-prepare-wash-ui.sh).
+function resolveWashUiRoot(): string {
+	try {
+		return dirname(
+			fileURLToPath(
+				import.meta.resolve('@menzies-mariesta-com/menzies-design-wash-ui/package.json')
+			)
+		);
+	} catch {
+		const nested = fileURLToPath(
+			new URL('./node_modules/@menzies-mariesta-com/menzies-design-wash-ui/package.json', rootUrl)
+		);
+		if (existsSync(nested)) return dirname(nested);
+		throw new Error(
+			'Cannot resolve @menzies-mariesta-com/menzies-design-wash-ui. ' +
+				'For CI, run scripts/ci-prepare-wash-ui.sh before npm ci so ' +
+				'file:../../design-lib-menzies/packages/menzies-design-wash-ui exists and is built.'
+		);
+	}
+}
+
+const washUiRoot = resolveWashUiRoot();
 
 // Vite 8 client transforms skip bare `define` replacement (globals only; ES modules
 // cannot see them). Write a tiny constant module instead of importing package.json.

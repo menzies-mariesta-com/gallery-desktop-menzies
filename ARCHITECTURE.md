@@ -3,6 +3,7 @@
 ## Shell
 
 - Static SvelteKit SPA in Tauri webview (port **2002** in development).
+- Wash UI comes from `file:../../design-lib-menzies/packages/menzies-design-wash-ui`. GitHub Actions prepares that sibling with `scripts/ci-prepare-wash-ui.sh` before `npm ci` (clone + `npm run build:lib`).
 - Custom titlebar, Wash UI vermilion default pigment, light/dark/system modes.
 - App shell uses `washShell` paper-grain plus animated watercolor splash atmosphere (`WashAtmosphere`, seed from bundle id).
 - Business logic for filesystem listing, image edits, copies, renames, order, and extension install lives in Rust commands.

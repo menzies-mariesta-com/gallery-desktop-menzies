@@ -74,6 +74,14 @@ jobs:
           node-version: '22'
           cache: npm
 
+      # Wash UI is file:../../design-lib-menzies/... (outside this checkout; dist gitignored).
+      # Private design-lib: set repo secret DESIGN_LIB_CHECKOUT_TOKEN (contents:read).
+      - name: 'Prepare Wash UI (file sibling)'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DESIGN_LIB_CHECKOUT_TOKEN: ${{ secrets.DESIGN_LIB_CHECKOUT_TOKEN }}
+        run: bash scripts/ci-prepare-wash-ui.sh
+
       - name: Install npm dependencies
         env:
           PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
