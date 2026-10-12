@@ -24,9 +24,10 @@ function isTauriRuntime(): boolean {
 /**
  * Check GitHub Releases via tauri-plugin-updater, then download/install if the user confirms.
  * Requires configured pubkey and OWNER/REPO endpoint in tauri.conf.json.
+ * Prefer an in-app dialog for confirmInstall. Never pass window.confirm.
  */
 export async function runUpdateCheck(
-	confirmInstall: (version: string) => boolean
+	confirmInstall: (version: string) => boolean | Promise<boolean>
 ): Promise<UpdateFlowResult> {
 	if (!isTauriRuntime()) {
 		return {
@@ -42,7 +43,7 @@ export async function runUpdateCheck(
 		}
 
 		const version = update.version;
-		if (!confirmInstall(version)) {
+		if (!(await confirmInstall(version))) {
 			return { outcome: 'declined', version };
 		}
 

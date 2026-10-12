@@ -40,6 +40,101 @@ body {
 	pointer-events: none;
 }
 
+@keyframes wash-atmo-drift {
+	0%,
+	100% {
+		transform: translate(-50%, -50%) rotate(var(--wash-atmo-rot, 0deg));
+	}
+	33% {
+		transform: translate(calc(-50% + 12px), calc(-50% - 8px)) rotate(var(--wash-atmo-rot, 0deg));
+	}
+	66% {
+		transform: translate(calc(-50% - 10px), calc(-50% + 6px)) rotate(var(--wash-atmo-rot, 0deg));
+	}
+}
+
+.wash-atmo-slot {
+	transform: translate(-50%, -50%) rotate(var(--wash-atmo-rot, 0deg));
+	transform-origin: center center;
+	opacity: 0.85;
+}
+
+.wash-atmo-slot--drift {
+	animation: wash-atmo-drift 22s ease-in-out infinite;
+	animation-delay: var(--wash-atmo-drift-delay, 0s);
+}
+
+.wash-atmo-slot :global(svg) {
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+
+/* Image editor: panel sections, hard-cut preview (no crossfade), control press. */
+.image-editor-shell {
+	opacity: 0;
+	transform: translateY(0.35rem);
+	transition:
+		opacity 180ms ease,
+		transform 180ms ease;
+}
+
+.image-editor-shell--ready {
+	opacity: 1;
+	transform: translateY(0);
+}
+
+.image-editor-panel {
+	gap: 0;
+}
+
+.image-editor-section {
+	border-bottom: 1px solid color-mix(in oklab, var(--color-base-content, #1c1917) 12%, transparent);
+	padding-block: 0.75rem;
+}
+
+.image-editor-section:first-child {
+	padding-top: 0;
+}
+
+.image-editor-section--actions {
+	border-bottom: none;
+	padding-bottom: 0;
+}
+
+.image-editor-stage--motion {
+	transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.image-editor-preview {
+	display: block;
+}
+
+.image-editor-press {
+	transition: transform 100ms ease;
+}
+
+.image-editor-press:not(:disabled):active {
+	transform: scale(0.94);
+}
+
+.image-editor-dialog-backdrop {
+	animation: image-editor-backdrop-in 180ms ease;
+}
+
+.image-editor-dialog {
+	transform-origin: center center;
+}
+
+@keyframes image-editor-backdrop-in {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
 @media (prefers-reduced-motion: reduce) {
 	*,
 	*::before,
@@ -49,4 +144,24 @@ body {
 		transition-duration: 0.01ms !important;
 		scroll-behavior: auto !important;
 	}
+
+	.image-editor-shell,
+	.image-editor-shell--ready {
+		opacity: 1;
+		transform: none;
+	}
+
+	.image-editor-stage--motion {
+		transition: none;
+	}
+
+	.image-editor-press:not(:disabled):active {
+		transform: none;
+	}
+}
+
+/* Gallery grid: skip offscreen paint work for large folders. */
+.gallery-tile {
+	content-visibility: auto;
+	contain-intrinsic-size: auto 220px;
 }

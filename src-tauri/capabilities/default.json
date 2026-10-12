@@ -1,7 +1,7 @@
 {
 	"$schema": "../gen/schemas/desktop-schema.json",
 	"identifier": "default",
-	"description": "Window chrome, updater, and process permissions for the gallery shell",
+	"description": "Window chrome, folder dialog, extension catalog HTTP, updater, and process permissions for the gallery shell",
 	"windows": ["main"],
 	"permissions": [
 		"core:default",
@@ -12,6 +12,12 @@
 		"core:window:allow-toggle-maximize",
 		"core:window:allow-is-maximized",
 		"core:window:allow-start-dragging",
+		"dialog:default",
+		"http:default",
+		{
+			"identifier": "http:allow-fetch",
+			"allow": [{ "url": "https://menzies.mariesta.com/*" }]
+		},
 		"updater:default",
 		"process:allow-restart"
 	]

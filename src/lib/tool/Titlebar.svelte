@@ -13,12 +13,17 @@
 	import WashIcon from '$lib/tool/WashIcon.svelte';
 	import { washIcons } from '$lib/tool/wash-icons';
 	import { requestGalleryRefresh } from '$lib/tool/gallery-refresh';
+	import ExtensionsMenu from '$lib/tool/ExtensionsMenu.svelte';
+	import { portal } from '$lib/util/portal';
 
 	let maximized = $state(false);
 	let appearance = $state<AppearanceMode>(getAppearance());
 	let pigment = $state<WatercolorThemeId>(getPigment());
 	let themeOpen = $state(false);
 	let updating = $state(false);
+	let updateDialogOpen = $state(false);
+	let updateDialogVersion = $state('');
+	let updateDialogResolve: ((ok: boolean) => void) | null = null;
 	let toast = $state<{ tone: 'success' | 'error' | 'info' | 'warning'; text: string } | null>(null);
 	let toastTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -87,13 +92,26 @@
 		themeOpen = false;
 	}
 
+	function askUpdateConfirm(version: string): Promise<boolean> {
+		updateDialogVersion = version;
+		updateDialogOpen = true;
+		return new Promise((resolve) => {
+			updateDialogResolve = resolve;
+		});
+	}
+
+	function finishUpdateDialog(ok: boolean) {
+		updateDialogOpen = false;
+		const resolve = updateDialogResolve;
+		updateDialogResolve = null;
+		resolve?.(ok);
+	}
+
 	async function onDownloads() {
 		if (updating) return;
 		updating = true;
 		try {
-			const result = await runUpdateCheck((version) =>
-				window.confirm(m.update_available_confirm({ version }))
-			);
+			const result = await runUpdateCheck((version) => askUpdateConfirm(version));
 			switch (result.outcome) {
 				case 'up_to_date':
 					showToast('success', m.update_up_to_date());
@@ -117,11 +135,17 @@
 
 	function onDocPointerDown(event: PointerEvent) {
 		const el = event.target as HTMLElement | null;
+		if (updateDialogOpen) return;
 		if (!el?.closest('[data-theme-menu]')) themeOpen = false;
 	}
 
 	function onKeydown(event: KeyboardEvent) {
-		if (event.key === 'Escape') themeOpen = false;
+		if (event.key !== 'Escape') return;
+		if (updateDialogOpen) {
+			finishUpdateDialog(false);
+			return;
+		}
+		themeOpen = false;
 	}
 </script>
 
@@ -131,20 +155,28 @@
 	data-titlebar
 	class="border-ink-border/15 bg-base-100/90 relative z-[200] flex h-10 shrink-0 items-center overflow-visible border-b px-1 backdrop-blur-sm"
 >
-	<div
-		class="flex min-w-[8rem] flex-1 cursor-grab items-center gap-2 overflow-visible pr-3 pl-2 active:cursor-grabbing"
-		onpointerdown={startDrag}
-		role="presentation"
-	>
-		<span class="inline-flex max-w-full items-baseline gap-1 overflow-visible pb-0.5">
-			<span
-				class="font-display text-base-content text-sm leading-normal font-semibold tracking-wide whitespace-nowrap"
-				>{m.app_title()}</span
-			>
-			<span class="shrink-0 pe-1.5 pt-[0.15em] text-[0.65em] leading-none italic opacity-50"
-				>{APP_VERSION}</span
-			>
-		</span>
+	<div class="flex min-w-0 flex-1 items-center overflow-visible">
+		<div
+			class="flex min-w-[8rem] shrink-0 cursor-grab items-center gap-2 overflow-visible pr-1 pl-2 active:cursor-grabbing"
+			onpointerdown={startDrag}
+			role="presentation"
+		>
+			<span class="inline-flex max-w-full items-baseline gap-1 overflow-visible pb-0.5">
+				<span
+					class="font-display text-base-content text-sm leading-normal font-semibold tracking-wide whitespace-nowrap"
+					>{m.app_title()}</span
+				>
+				<span class="shrink-0 pe-1.5 pt-[0.15em] text-[0.65em] leading-none italic opacity-50"
+					>{APP_VERSION}</span
+				>
+			</span>
+		</div>
+		<ExtensionsMenu />
+		<div
+			class="min-h-10 min-w-[1rem] flex-1 cursor-grab active:cursor-grabbing"
+			onpointerdown={startDrag}
+			role="presentation"
+		></div>
 	</div>
 
 	<div
@@ -317,8 +349,51 @@
 	</div>
 </header>
 
+{#if updateDialogOpen}
+	<!-- Portal past titlebar backdrop-filter so fixed overlay covers the window. Never window.confirm. -->
+	<div
+		class="fixed inset-0 z-[360] flex items-center justify-center bg-black/50 p-4"
+		role="presentation"
+		use:portal
+		onclick={() => finishUpdateDialog(false)}
+	>
+		<div
+			class="bg-base-100 border-ink-border w-full max-w-sm space-y-3 rounded-lg border p-4 shadow-lg"
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby="update-dialog-title"
+			tabindex="-1"
+			onclick={(event) => event.stopPropagation()}
+			onkeydown={(event) => event.stopPropagation()}
+		>
+			<h2 id="update-dialog-title" class="font-display text-primary text-xl font-bold">
+				{m.update_available_title()}
+			</h2>
+			<p class="text-base-content/80 text-sm leading-relaxed">
+				{m.update_available_body({ version: updateDialogVersion })}
+			</p>
+			<div class="flex justify-end gap-2">
+				<button
+					type="button"
+					class="btn btn-ghost btn-sm cursor-pointer"
+					onclick={() => finishUpdateDialog(false)}
+				>
+					{m.update_cancel()}
+				</button>
+				<button
+					type="button"
+					class="btn btn-primary btn-sm cursor-pointer"
+					onclick={() => finishUpdateDialog(true)}
+				>
+					{m.update_install_action()}
+				</button>
+			</div>
+		</div>
+	</div>
+{/if}
+
 {#if toast}
-	<div class="toast toast-bottom toast-end z-[300]">
+	<div class="toast toast-bottom toast-end z-[300]" use:portal>
 		<div class="alert alert-{toast.tone} shadow-lg">
 			<span>{toast.text}</span>
 		</div>

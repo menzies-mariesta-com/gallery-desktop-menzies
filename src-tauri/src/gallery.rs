@@ -20,6 +20,8 @@ pub enum GalleryError {
     NoPicturesDir,
     #[error("not a directory: {0}")]
     NotDirectory(String),
+    #[error("not a file: {0}")]
+    NotFile(String),
     #[error("path is outside the allowed gallery root")]
     PathEscape,
     #[error("invalid settings json")]
@@ -81,7 +83,7 @@ fn settings_path() -> Result<PathBuf, GalleryError> {
     Ok(PathBuf::from(dirs.config_dir).join(SETTINGS_FILE))
 }
 
-fn is_image(path: &Path) -> bool {
+pub(crate) fn is_image(path: &Path) -> bool {
     path.extension()
         .and_then(|ext| ext.to_str())
         .map(|ext| {
@@ -119,7 +121,7 @@ fn pictures_root() -> Result<PathBuf, GalleryError> {
 }
 
 /// Resolve an allowed gallery root: Pictures, or a prior root still under Pictures.
-fn resolve_allowed_root(preferred: Option<&str>) -> Result<PathBuf, GalleryError> {
+pub(crate) fn resolve_allowed_root(preferred: Option<&str>) -> Result<PathBuf, GalleryError> {
     let pictures = pictures_root()?;
     if let Some(pref) = preferred {
         let candidate = PathBuf::from(pref);
@@ -241,4 +243,60 @@ pub fn save_gallery_settings(mut settings: GallerySettings) -> Result<(), String
     }
     let raw = serde_json::to_string_pretty(&settings).map_err(|e| e.to_string())?;
     fs::write(path, raw).map_err(|e| e.to_string())
+}
+
+pub(crate) fn is_indexable_image(path: &Path) -> bool {
+    path.extension()
+        .and_then(|ext| ext.to_str())
+        .is_some_and(|ext| {
+            matches!(
+                ext.to_ascii_lowercase().as_str(),
+                "jpg" | "jpeg" | "png" | "webp" | "bmp"
+            )
+        })
+}
+
+pub(crate) fn resolve_index_dir(
+    dir: &str,
+    allowed_root: Option<&str>,
+) -> Result<PathBuf, GalleryError> {
+    let boundary = resolve_allowed_root(allowed_root)?;
+    ensure_under_allowed(Path::new(dir), &boundary)
+}
+
+pub(crate) fn command_err(code: &str, detail: impl std::fmt::Display) -> String {
+    format!("gallery:{code}:{detail}")
+}
+
+pub(crate) fn gallery_command_err(err: GalleryError) -> String {
+    let code = match &err {
+        GalleryError::PathEscape => "path_escape",
+        GalleryError::NotDirectory(_) => "not_directory",
+        GalleryError::NotFile(_) => "not_file",
+        GalleryError::NoPicturesDir => "no_pictures_dir",
+        GalleryError::InvalidSettings => "invalid_settings",
+        GalleryError::Io(_) => "io",
+        GalleryError::Path(_) => "path",
+    };
+    command_err(code, err)
+}
+
+/// Canonical file that stays under the Pictures root or a legacy allowed root.
+pub(crate) fn gate_file(path: &Path, allowed_root: Option<&str>) -> Result<PathBuf, GalleryError> {
+    let boundary = resolve_allowed_root(allowed_root)?;
+    let canonical = fs::canonicalize(path).map_err(GalleryError::Io)?;
+    if !canonical.is_file() {
+        return Err(GalleryError::NotFile(
+            canonical.to_string_lossy().into_owned(),
+        ));
+    }
+    if canonical != boundary && !canonical.starts_with(&boundary) {
+        return Err(GalleryError::PathEscape);
+    }
+    Ok(canonical)
+}
+
+pub(crate) fn gate_dir(path: &Path, allowed_root: Option<&str>) -> Result<PathBuf, GalleryError> {
+    let boundary = resolve_allowed_root(allowed_root)?;
+    ensure_under_allowed(path, &boundary)
 }

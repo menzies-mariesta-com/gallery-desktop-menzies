@@ -1,6 +1,6 @@
 # Gallery Desktop Menzies
 
-Linux-first image gallery for the Menzies desktop suite. Opens your **Pictures** folder by default. Browse subfolders from the grid. Lightbox viewer for images.
+Linux-first image gallery for the Menzies desktop suite. Opens your **Pictures** folder by default. Browse subfolders from the grid. Lightbox viewer for images. Raster edits, copy, rename, and manual order run locally. Face recognition is an optional local extension and is off until you turn the experimental flag on and install a package yourself. The signed catalog is hosted with the Menzies site. Face recognition is not published there yet.
 
 ## Identity
 
